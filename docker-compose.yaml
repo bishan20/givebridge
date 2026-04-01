@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: givebridge-db
+    environment:
+      POSTGRES_DB: givebridge
+      POSTGRES_USER: givebridge_user
+      POSTGRES_PASSWORD: givebridge_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

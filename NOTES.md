@@ -169,3 +169,91 @@ using container names as hostnames instead of localhost. Docker Compose
 automatically sets up an internal network between them.
 
 ---
+
+## Repository Pattern vs DAO Pattern
+
+### What I used before in older projects (Spring Data JDBC + DAO pattern)
+Previous job used `spring-boot-starter-data-jdbc` — lower level than JPA,
+no Hibernate, no automatic entity mapping. Had to manually write SQL in DAO layer.
+```
+Controller
+    ↓
+ServiceInterface → ServiceImpl (business logic)
+    ↓
+DAO (manual SQL queries using JDBC)
+    ↓
+Database
+```
+
+### What we use now for this project (Spring Data JPA + Repository pattern)
+```
+Controller
+    ↓
+Service (business logic)
+    ↓
+Repository (Spring Data JPA — auto-generated)
+    ↓
+Hibernate (auto-generated SQL)
+    ↓
+JDBC
+    ↓
+Database
+```
+Spring Data JPA eliminates the DAO layer entirely by auto-generating it at runtime.
+
+### Key Differences
+| | JDBC + DAO | JPA + Repository |
+|---|---|---|
+| **SQL control** | Full manual control | Hibernate generates it |
+| **Boilerplate code** | A lot | Very little |
+| **Learning curve** | Lower (closer to raw SQL) | Higher (need to understand ORM) |
+| **Complex queries** | Easier to write manually | Can get complicated |
+| **Speed of development** | Slower | Much faster |
+
+### Why old projects had ServiceInterface + ServiceImpl
+Many enterprise teams write both a Service interface and a Service implementation:
+- Older Spring versions needed interfaces to create proxies for transactions
+- Supports multiple implementations (e.g. one for prod, one for testing)
+- Often just team convention carried over from older Java EE days
+
+Modern Spring Boot does NOT require a service interface unless you genuinely
+need multiple implementations. One service class is the recommended approach now.
+
+### Why we don't have a Service interface in GiveBridge
+CampaignService is just one class — no interface needed for a project this size.
+Clean, simple, and follows modern Spring Boot conventions.
+
+### Spring Data JPA method name magic
+Spring reads the method name and auto-generates SQL:
+
+findAllByOrderByCreatedAtDesc()
+→ SELECT * FROM campaigns ORDER BY created_at DESC
+
+Keywords Spring understands:
+- findBy      → WHERE
+- OrderBy     → ORDER BY
+- Desc        → DESC
+- And         → AND
+- Like        → LIKE
+
+Example: findByTitleContainingOrderByCreatedAtDesc(String title)
+→ SELECT * FROM campaigns WHERE title LIKE '%title%' ORDER BY created_at DESC
+
+No DAO, no SQL, no implementation — just a method name.
+
+### @RequiredArgsConstructor vs @Autowired
+Old style (still works but not recommended):
+@Autowired
+private CampaignRepository campaignRepository;
+
+Modern style (what we use):
+@RequiredArgsConstructor  ← on the class
+private final CampaignRepository campaignRepository;  ← note: final
+
+Lombok generates a constructor that injects the dependency.
+Constructor injection is recommended because:
+- Makes dependencies explicit and required (final keyword)
+- Easier to unit test — pass mock objects directly in constructor
+- Officially recommended by the Spring team
+
+---

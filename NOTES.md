@@ -342,5 +342,108 @@ createdAt   → set automatically via @PrePersist
 
 ---
 
+## Donation Entity
+
+### Design Decision — No Donor Account System
+Each row in the donations table represents a single donation transaction,
+not a unique donor/person. If John Doe donates to 3 campaigns, he appears
+3 times as separate rows. No way to link donations to the same person.
+
+To uniquely identify donors you would need a separate donors table with
+a donor_id foreign key in donations — essentially a full user account system
+with authentication. Deferred as a future enhancement for GiveBridge.
+
+### One-to-Many Relationship (Campaign → Donations)
+One campaign can have many donations.
+
+```
+campaigns table              donations table
+id | title | goal     ←───  id | amount | campaign_id (FK)
+1  | Fund1 | 2500            1  | 100    | 1
+                              2  | 250    | 1
+```
+
+In Java this is expressed with @ManyToOne on the Donation side:
+```java
+@ManyToOne(fetch = FetchType.LAZY)
+@JoinColumn(name = "campaign_id", nullable = false)
+private Campaign campaign;
+```
+
+### FetchType.LAZY vs FetchType.EAGER
+- LAZY  — loads Campaign data only when you explicitly access it. More efficient.
+- EAGER — loads Campaign data immediately every time a Donation is loaded.
+  Less efficient — loads data you may not even need.
+  Always prefer LAZY for @ManyToOne and @ManyToMany relationships.
+
+### @JoinColumn
+Tells Hibernate to create a campaign_id column in the donations table
+that stores the foreign key reference to the campaigns table.
+Always specify the name explicitly — without it Hibernate auto-generates
+an unpredictable column name.
+
+```
+Java field          →    Database column
+Campaign campaign   →    campaign_id (foreign key → campaigns.id)
+```
+
+### Why @PrePersist is repeated in each Entity
+Even though Campaign and Donation are in the same package, you cannot
+reuse Campaign's @PrePersist in Donation because `this` refers to the
+instance of the class the method belongs to. Calling it from Donation
+would set Campaign's createdAt field, not Donation's donatedAt field.
+
+### @MappedSuperclass — the right way to reuse @PrePersist
+For entities that share common fields, create a base class:
+
+```java
+@MappedSuperclass
+public abstract class BaseEntity {
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+}
+```
+
+Then extend it:
+```java
+public class Campaign extends BaseEntity { ... }
+public class Donation extends BaseEntity { ... }
+```
+
+@MappedSuperclass tells Hibernate "this class is not a table itself,
+but share its fields with all subclasses that extend it."
+Not used in GiveBridge because Campaign uses createdAt while Donation
+uses donatedAt — different field names make a shared base class awkward.
+Common in enterprise projects where many entities share createdAt,
+updatedAt, createdBy etc.
+
+### @Transactional — critical for createDonation
+When creating a donation, two database operations must happen together:
+1. Insert into donations table
+2. Update raisedAmount in campaigns table
+
+If step 1 succeeds but step 2 fails, the donation is recorded but the
+campaign total is wrong — data is now inconsistent.
+
+@Transactional wraps both operations in a single transaction:
+- Both succeed → changes committed to database
+- Either fails  → both operations rolled back automatically
+
+```java
+@Transactional
+public Donation createDonation(DonationRequestDTO dto) {
+    // 1. save donation
+    // 2. update campaign raisedAmount
+    // if anything fails → both rolled back automatically
+}
+```
+
+Always put @Transactional on the Service method, never on the Controller.
+
 
 ---

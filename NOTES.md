@@ -445,5 +445,70 @@ public Donation createDonation(DonationRequestDTO dto) {
 
 Always put @Transactional on the Service method, never on the Controller.
 
+---
+
+## N+1 Query Problem
+
+### What is it?
+When fetching a list of entities that have relationships, Hibernate fires:
+- 1 query to get all entities
+- 1 additional query PER entity to get its related data
+  Total: 1 + N queries (N = number of entities)
+
+Example with 100 donations:
+- 1 query: SELECT * FROM donations
+- 100 queries: SELECT * FROM campaigns WHERE id = ? (once per donation)
+  = 101 total queries — very inefficient at scale
+
+### Why it happens
+FetchType.LAZY only loads related data when explicitly accessed.
+When mapToResponseDTO accesses donation.getCampaign(), Hibernate
+fires a separate query for each donation's campaign.
+
+### Fix — JOIN FETCH query
+```java
+@Query("SELECT d FROM Donation d JOIN FETCH d.campaign ORDER BY d.donatedAt DESC")
+List<Donation> findAllWithCampaignOrderByDonatedAtDesc();
+```
+Generates a single JOIN query — fetches donations and campaigns together.
+
+### Why getDonationsByCampaignId doesn't have N+1
+Spring Data JPA uses a LEFT JOIN automatically when filtering by a
+relationship field (campaignId). Campaign data is already in memory
+from the JOIN so mapToResponseDTO doesn't trigger extra queries.
+
+## Response DTO pattern — always use it
+Never return Entity objects directly from Controllers.
+Always map to a Response DTO first.
+
+Returning entities directly causes:
+- ByteBuddyInterceptor error — Jackson can't serialize lazy proxies
+- N+1 queries — Jackson triggers lazy loading on every relationship field
+- Over-exposure — internal fields leak into the API response
+
+Always:
+Controller returns ResponseDTO
+Service maps Entity → ResponseDTO
+ResponseDTO contains only simple Java types (no entity references)
+
 
 ---
+
+## Hibernate First Level Cache
+Hibernate caches entities within a single request/session.
+If multiple donations belong to the same campaign, Hibernate
+fetches the campaign once and reuses it from cache.
+
+N+1 formula is more accurately:
+1 + number of UNIQUE related entities referenced
+NOT 1 + total number of entities
+
+Example with 4 donations across 2 campaigns:
+Query 1: fetch all donations
+Query 2: fetch campaign 2 (used for donations 3 and 4)
+Query 3: fetch campaign 1 (used for donations 1 and 2)
+Total: 3 queries, not 5
+
+Worst case: every donation belongs to a different campaign
+100 donations × 100 unique campaigns = 101 queries
+→ This is when JOIN FETCH becomes critical

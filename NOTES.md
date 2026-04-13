@@ -342,6 +342,60 @@ createdAt   → set automatically via @PrePersist
 
 ---
 
+## Jackson and @RequestBody
+
+### How they work together
+@RequestBody and Jackson are two different things working together:
+- @RequestBody — the instruction that tells Spring to convert the request body
+- Jackson — the actual engine that performs the conversion
+
+Think of it like:
+- @RequestBody is the ORDER ("convert this request body")
+- Jackson is the CHEF who actually does the work
+
+### Deserialization (JSON → Java) — incoming request
+```
+HTTP Request Body (raw JSON string)
+        ↓
+Spring sees @RequestBody on the method parameter
+        ↓
+Spring delegates to Jackson (HttpMessageConverter)
+        ↓
+Jackson reads JSON and maps each field to matching
+field in the DTO (e.g. "name" → dto.name)
+        ↓
+Method receives a fully populated DTO object
+```
+
+### Serialization (Java → JSON) — outgoing response
+```
+Method returns a DTO/object
+        ↓
+Spring sees @RestController (includes @ResponseBody)
+        ↓
+Spring delegates to Jackson again
+        ↓
+Jackson converts Java object → JSON string
+        ↓
+JSON sent back in HTTP response body
+```
+
+### Summary
+| | Role |
+|---|---|
+| `@RequestBody` | Tells Spring to deserialize the request body into a Java object |
+| `@ResponseBody` (via `@RestController`) | Tells Spring to serialize return value into JSON |
+| **Jackson** | Actually performs both serialization and deserialization |
+
+### Why camelCase in JSON matches Java fields
+Jackson automatically maps JSON camelCase fields to Java camelCase fields:
+JSON "goalAmount" → Java field goalAmount
+No configuration needed — this is Jackson's default behavior.
+If the JSON field name doesn't match the Java field name, you can use
+@JsonProperty("goal_amount") on the Java field to tell Jackson explicitly.
+
+---
+
 ## Donation Entity
 
 ### Design Decision — No Donor Account System

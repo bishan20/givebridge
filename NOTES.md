@@ -566,3 +566,80 @@ Total: 3 queries, not 5
 Worst case: every donation belongs to a different campaign
 100 donations × 100 unique campaigns = 101 queries
 → This is when JOIN FETCH becomes critical
+
+---
+
+## Global Exception Handler
+
+### Why we need it
+Without a global exception handler, Spring returns its default error response:
+```json
+{
+    "timestamp": "2026-04-17T03:56:38.929+00:00",
+    "status": 500,
+    "error": "Internal Server Error",
+    "path": "/api/donations/5"
+}
+```
+Problems with this:
+- Wrong status code — EntityNotFoundException returns 500 instead of 404
+- No meaningful message telling the client what went wrong
+- Inconsistent format across different error types
+
+### @RestControllerAdvice
+Intercepts exceptions thrown anywhere in the application and returns
+clean, consistent JSON error responses. Combination of:
+- @ControllerAdvice — intercepts all controllers globally
+- @ResponseBody — returns JSON
+
+Without it you'd need try/catch blocks in every controller method.
+
+### Exception handlers we implemented
+| Exception | Status | When |
+|---|---|---|
+| `EntityNotFoundException` | 404 Not Found | Resource not found in database |
+| `IllegalArgumentException` | 400 Bad Request | Business rule violated (e.g. expired campaign) |
+| `MethodArgumentNotValidException` | 400 Bad Request | @Valid fails on DTO |
+| `Exception` | 500 Internal Server Error | Unexpected errors — safety net |
+
+### Standardized error response shape
+All errors return the same ErrorResponse DTO shape:
+```json
+{
+    "status": 404,
+    "message": "Donation not found with id: 999",
+    "timestamp": "2026-04-17T03:56:38",
+    "fieldErrors": null
+}
+```
+
+Validation errors additionally include fieldErrors:
+```json
+{
+    "status": 400,
+    "message": "Validation failed",
+    "timestamp": "2026-04-17T03:56:38",
+    "fieldErrors": {
+        "name": "Name is required",
+        "email": "Email is required"
+    }
+}
+```
+
+### @JsonInclude(JsonInclude.Include.NON_NULL)
+Added to ErrorResponse DTO. Tells Jackson to skip null fields in JSON output.
+So fieldErrors won't appear in 404/500 responses — only in validation errors.
+Keeps responses clean without unnecessary null fields.
+
+### HTTP status code — header vs body
+The official HTTP status code always travels in the HTTP response HEADER.
+This is what Postman shows as "Status: 404 Not Found" at the top.
+
+Including status in the response BODY is optional — just a convenience
+so the client doesn't have to look in two places. We include it to keep
+all error responses consistent in shape.
+
+### Why consistency matters
+Every error response from our API has the same shape — just different values.
+Frontend developers consuming the API only need to handle one error format
+instead of writing different handling logic for each error type.

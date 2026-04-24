@@ -41,7 +41,7 @@ public class DonationService {
      * @return list of all donations for the campaign as response DTOs
      */
     public List<DonationResponseDTO> getDonationsByCampaignId(Long id) {
-        Campaign existing = campaignService.getCampaignById(id);
+        Campaign existing = campaignService.getCampaignEntityById(id);
         return donationRepository.findByCampaignIdOrderByDonatedAtDesc(existing.getId())
                 .stream()
                 .map(this::mapToResponseDTO)
@@ -72,7 +72,7 @@ public class DonationService {
      */
     @Transactional
     public DonationResponseDTO createDonation(DonationRequestDTO dto) {
-        Campaign existing = campaignService.getCampaignById(dto.getCampaignId());
+        Campaign existing = campaignService.getCampaignEntityById(dto.getCampaignId());
 
         if (existing.getDeadline().isBefore(LocalDate.now())) {
             throw new IllegalArgumentException("This campaign is due as of " + existing.getDeadline());

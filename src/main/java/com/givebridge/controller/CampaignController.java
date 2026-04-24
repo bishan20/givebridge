@@ -1,6 +1,7 @@
 package com.givebridge.controller;
 
 import com.givebridge.dto.CampaignRequestDTO;
+import com.givebridge.dto.CampaignResponseDTO;
 import com.givebridge.model.Campaign;
 import com.givebridge.service.CampaignService;
 import jakarta.validation.Valid;
@@ -30,8 +31,8 @@ public class CampaignController {
      * @return list of all campaigns with HTTP 200 OK
      */
     @GetMapping
-    public ResponseEntity<List<Campaign>> getAllCampaigns() {
-        List<Campaign> campaigns = campaignService.getAllCampaigns();
+    public ResponseEntity<List<CampaignResponseDTO>> getAllCampaigns() {
+        List<CampaignResponseDTO> campaigns = campaignService.getAllCampaigns();
         return ResponseEntity.ok(campaigns);
     }
 
@@ -43,8 +44,8 @@ public class CampaignController {
      * @return the campaign with HTTP 200 OK, or 404 if not found
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Campaign> getCampaignById(@PathVariable Long id) {
-        Campaign campaign = campaignService.getCampaignById(id);
+    public ResponseEntity<CampaignResponseDTO> getCampaignById(@PathVariable Long id) {
+        CampaignResponseDTO campaign = campaignService.getCampaignById(id);
         return ResponseEntity.ok(campaign);
     }
 
@@ -56,8 +57,8 @@ public class CampaignController {
      * @return the created campaign with HTTP 201 Created
      */
     @PostMapping
-    public ResponseEntity<Campaign> createCampaign(@Valid @RequestBody CampaignRequestDTO dto) {
-        Campaign created = campaignService.createCampaign(dto);
+    public ResponseEntity<CampaignResponseDTO> createCampaign(@Valid @RequestBody CampaignRequestDTO dto) {
+        CampaignResponseDTO created = campaignService.createCampaign(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -70,10 +71,10 @@ public class CampaignController {
      * @return the updated campaign with HTTP 200 OK
      */
     @PutMapping("/{id}")
-    public ResponseEntity<Campaign> updateCampaign(
+    public ResponseEntity<CampaignResponseDTO> updateCampaign(
             @PathVariable Long id,
             @Valid @RequestBody CampaignRequestDTO dto) {
-        Campaign updated = campaignService.updateCampaign(id, dto);
+        CampaignResponseDTO updated = campaignService.updateCampaign(id, dto);
         return ResponseEntity.ok(updated);
     }
 

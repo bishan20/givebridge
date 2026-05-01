@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GiveBridge — Community Fundraising</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="page-wrapper">
+
+<!-- NAVIGATION -->
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Give<span>Bridge</span></a>
+        <div class="nav-links">
+            <a href="index.html" class="active">🏠 <span>Campaigns</span></a>
+            <a href="create-campaign.html">✚ <span>Start a Campaign</span></a>
+        </div>
+    </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="page-header-inner">
+        <div>
+            <h1>Community Campaigns</h1>
+            <p>Support causes that matter. Every donation makes a difference.</p>
+        </div>
+        <a href="create-campaign.html" class="btn btn-primary">
+            ✚ Start a Campaign
+        </a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main>
+    <div class="container">
+
+        <!-- STATS BAR -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <span class="stat-value" id="totalCampaigns">—</span>
+                <span class="stat-label">Campaigns</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="totalRaised">—</span>
+                <span class="stat-label">Total Raised</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-value" id="activeCampaigns">—</span>
+                <span class="stat-label">Active</span>
+            </div>
+        </div>
+
+        <!-- LOADING STATE -->
+        <div class="loading" id="loadingState">
+            <div class="spinner"></div>
+            <p>Loading campaigns...</p>
+        </div>
+
+        <!-- ERROR STATE -->
+        <div class="alert alert-error" id="errorState">
+            Failed to load campaigns. Please try again later.
+        </div>
+
+        <!-- CAMPAIGN GRID -->
+        <div class="campaign-grid" id="campaignGrid">
+            <!-- Cards injected by JavaScript -->
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+            <h3>No campaigns yet</h3>
+            <p>Be the first to start a fundraising campaign!</p>
+            <a href="create-campaign.html" class="btn btn-primary mt-4">
+                Start a Campaign
+            </a>
+        </div>
+
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 <span>GiveBridge</span> — Built with Spring Boot & jQuery</p>
+</footer>
+
+<!-- jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<!-- Page JavaScript -->
+<script src="js/campaigns.js"></script>
+
+</body>
+</html>

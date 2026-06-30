@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign — GiveBridge</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="page-wrapper">
+
+<!-- NAVIGATION -->
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Give<span>Bridge</span></a>
+        <div class="nav-links">
+            <a href="index.html">🏠 <span>Campaigns</span></a>
+            <a href="create-campaign.html">✚ <span>Start a Campaign</span></a>
+        </div>
+    </div>
+</nav>
+
+<!-- LOADING STATE -->
+<div class="loading" id="loadingState" style="margin-top: 80px;">
+    <div class="spinner"></div>
+    <p>Loading campaign...</p>
+</div>
+
+<!-- ERROR STATE -->
+<div class="container" id="errorState" style="display:none; margin-top:80px;">
+    <div class="alert alert-error" style="display:block;">
+        Campaign not found or failed to load.
+        <a href="index.html">← Back to campaigns</a>
+    </div>
+</div>
+
+<!-- MAIN CONTENT (hidden until loaded) -->
+<div id="pageContent" style="display:none;">
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <a href="index.html" class="back-link">← All Campaigns</a>
+                <h1 id="campaignTitle">—</h1>
+                <div style="margin-top: 12px;">
+                    <span id="campaignBadge"></span>
+                    <span class="text-muted" style="margin-left: 12px; font-size: 0.9rem;">
+                            📅 Deadline: <span id="campaignDeadline">—</span>
+                        </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="container">
+            <div class="campaign-detail-grid">
+
+                <!-- LEFT COLUMN — Campaign Info + Donation Form -->
+                <div class="campaign-detail-left">
+
+                    <!-- Campaign Description -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 style="font-size: 1.2rem; margin-bottom: 12px;">
+                                About this Campaign
+                            </h2>
+                            <p id="campaignDescription" style="line-height: 1.8;">—</p>
+                        </div>
+                    </div>
+
+                    <!-- Donation Form -->
+                    <div class="card" id="donationFormCard">
+                        <div class="card-body">
+                            <h2 style="font-size: 1.2rem; margin-bottom: 20px;">
+                                Make a Donation
+                            </h2>
+
+                            <div class="alert alert-success" id="donationSuccess">
+                                🎉 Thank you for your donation! Your contribution makes a difference.
+                            </div>
+                            <div class="alert alert-error" id="donationError">
+                                Something went wrong. Please try again.
+                            </div>
+
+                            <div id="donationForm">
+                                <div class="form-group">
+                                    <label class="form-label" for="donorName">
+                                        Your Name *
+                                    </label>
+                                    <input type="text"
+                                           id="donorName"
+                                           class="form-control"
+                                           placeholder="John Doe">
+                                    <div class="form-error" id="nameError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="donorEmail">
+                                        Email Address *
+                                    </label>
+                                    <input type="email"
+                                           id="donorEmail"
+                                           class="form-control"
+                                           placeholder="john@example.com">
+                                    <div class="form-error" id="emailError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="donationAmount">
+                                        Donation Amount (USD) *
+                                    </label>
+                                    <input type="number"
+                                           id="donationAmount"
+                                           class="form-control"
+                                           placeholder="50"
+                                           min="1"
+                                           step="1">
+                                    <div class="form-error" id="amountError"></div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="donorMessage">
+                                        Message (Optional)
+                                    </label>
+                                    <textarea id="donorMessage"
+                                              class="form-control"
+                                              placeholder="Leave a message of support..."
+                                              rows="3"></textarea>
+                                </div>
+
+                                <button class="btn btn-primary w-100"
+                                        id="submitDonation">
+                                    💛 Donate Now
+                                </button>
+                            </div>
+
+                            <!-- Expired campaign message -->
+                            <div id="expiredMessage" style="display:none;">
+                                <div class="alert alert-error" style="display:block;">
+                                    This campaign has ended and is no longer accepting donations.
+                                </div>
+                                <a href="index.html" class="btn btn-secondary w-100">
+                                    Browse Other Campaigns
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN — Stats + Donor List -->
+                <div class="campaign-detail-right">
+
+                    <!-- Funding Progress Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 style="font-size: 1.1rem; margin-bottom: 16px;">
+                                Funding Progress
+                            </h2>
+
+                            <div class="funding-stats">
+                                <div class="funding-stat-main">
+                                    <span class="funding-amount" id="raisedAmount">$0</span>
+                                    <span class="funding-label">raised</span>
+                                </div>
+                                <div class="funding-stat-secondary">
+                                    <span>of </span>
+                                    <span id="goalAmount">$0</span>
+                                    <span> goal</span>
+                                </div>
+                            </div>
+
+                            <div class="progress-container">
+                                <div class="progress-label">
+                                    <span id="percentLabel">0%</span>
+                                    <span id="remainingLabel"></span>
+                                </div>
+                                <div class="progress-bar-bg">
+                                    <div class="progress-bar-fill"
+                                         id="progressBarFill"
+                                         style="width: 0%">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="funding-meta">
+                                <div class="funding-meta-item">
+                                    <span id="donorCount">0</span>
+                                    <span>donors</span>
+                                </div>
+                                <div class="funding-meta-item">
+                                    <span id="daysLeft">—</span>
+                                    <span>days left</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Donor List Card -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 style="font-size: 1.1rem; margin-bottom: 16px;">
+                                Recent Donors
+                            </h2>
+
+                            <div class="loading" id="donorsLoading">
+                                <div class="spinner"
+                                     style="width:24px;height:24px;border-width:2px;">
+                                </div>
+                            </div>
+
+                            <div id="donorList">
+                                <!-- Donor items injected by JS -->
+                            </div>
+
+                            <div class="empty-state"
+                                 id="noDonors"
+                                 style="display:none; padding: 32px 0;">
+                                <p>No donations yet. Be the first!</p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+</div><!-- end pageContent -->
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 <span>GiveBridge</span> — Built with Spring Boot & jQuery</p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="js/campaign.js"></script>
+
+</body>
+</html>

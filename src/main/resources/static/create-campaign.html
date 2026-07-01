@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Start a Campaign — GiveBridge</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="page-wrapper">
+
+<!-- NAVIGATION -->
+<nav>
+    <div class="nav-inner">
+        <a href="index.html" class="nav-logo">Give<span>Bridge</span></a>
+        <div class="nav-links">
+            <a href="index.html">🏠 <span>Campaigns</span></a>
+            <a href="create-campaign.html" class="active">✚ <span>Start a Campaign</span></a>
+        </div>
+    </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+    <div class="page-header-inner">
+        <div>
+            <a href="index.html" class="back-link">← All Campaigns</a>
+            <h1>Start a Campaign</h1>
+            <p>Share your cause and start raising funds from the community.</p>
+        </div>
+    </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<main>
+    <div class="container">
+        <div class="create-campaign-layout">
+
+            <!-- FORM CARD -->
+            <div class="card create-campaign-form-card">
+                <div class="card-body">
+
+                    <div class="alert alert-success" id="createSuccess">
+                        🎉 Campaign created successfully! Redirecting...
+                    </div>
+                    <div class="alert alert-error" id="createError">
+                        Something went wrong. Please try again.
+                    </div>
+
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label class="form-label" for="campaignTitle">
+                            Campaign Title *
+                        </label>
+                        <input type="text"
+                               id="campaignTitle"
+                               class="form-control"
+                               placeholder="e.g. Help rebuild our community center"
+                               maxlength="100">
+                        <div class="form-hint">Max 100 characters</div>
+                        <div class="form-error" id="titleError"></div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label class="form-label" for="campaignDescription">
+                            Description *
+                        </label>
+                        <textarea id="campaignDescription"
+                                  class="form-control"
+                                  placeholder="Tell your story. Why does this campaign matter? How will the funds be used?"
+                                  rows="6"></textarea>
+                        <div class="form-error" id="descriptionError"></div>
+                    </div>
+
+                    <!-- Goal Amount -->
+                    <div class="form-group">
+                        <label class="form-label" for="goalAmount">
+                            Fundraising Goal (USD) *
+                        </label>
+                        <input type="number"
+                               id="goalAmount"
+                               class="form-control"
+                               placeholder="5000"
+                               min="1"
+                               step="1">
+                        <div class="form-hint">Minimum goal is $1</div>
+                        <div class="form-error" id="goalError"></div>
+                    </div>
+
+                    <!-- Deadline -->
+                    <div class="form-group">
+                        <label class="form-label" for="deadline">
+                            Campaign Deadline *
+                        </label>
+                        <input type="date"
+                               id="deadline"
+                               class="form-control">
+                        <div class="form-hint">Must be a future date</div>
+                        <div class="form-error" id="deadlineError"></div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div style="display: flex; gap: 12px; margin-top: 8px;">
+                        <a href="index.html" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button class="btn btn-primary"
+                                id="submitCampaign"
+                                style="flex: 1;">
+                            🚀 Launch Campaign
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TIPS CARD -->
+            <div class="tips-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 style="font-size: 1rem; margin-bottom: 16px;">
+                            💡 Tips for a Successful Campaign
+                        </h3>
+                        <ul class="tips-list">
+                            <li>
+                                <strong>Be specific</strong>
+                                Explain exactly what the funds will be used for.
+                            </li>
+                            <li>
+                                <strong>Set a realistic goal</strong>
+                                Start small and exceed it rather than falling short.
+                            </li>
+                            <li>
+                                <strong>Tell your story</strong>
+                                People donate to people, not just causes.
+                            </li>
+                            <li>
+                                <strong>Set a clear deadline</strong>
+                                Urgency motivates donors to act sooner.
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Preview Card -->
+                <div class="card" id="previewCard">
+                    <div class="card-body">
+                        <h3 style="font-size: 1rem; margin-bottom: 16px;">
+                            👁 Live Preview
+                        </h3>
+                        <div class="preview-title" id="previewTitle">
+                            Your campaign title
+                        </div>
+                        <div class="preview-description" id="previewDescription">
+                            Your campaign description will appear here...
+                        </div>
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>$0 raised</span>
+                                <span>0%</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" style="width: 0%"></div>
+                            </div>
+                            <div class="progress-label mt-4">
+                                <span>Goal: <span id="previewGoal">$0</span></span>
+                            </div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: var(--text-light); margin-top: 12px;">
+                            📅 Deadline: <span id="previewDeadline">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+    <p>© 2026 <span>GiveBridge</span> — Built with Spring Boot & jQuery</p>
+</footer>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script src="js/create-campaign.js"></script>
+
+</body>
+</html>

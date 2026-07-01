@@ -803,3 +803,80 @@ footer span {
         position: static;
     }
 }
+
+/* ============================================
+   CREATE CAMPAIGN PAGE (create-campaign.html)
+   ============================================ */
+
+.create-campaign-layout {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+}
+
+.create-campaign-form-card {
+    /* takes up the full left column */
+}
+
+.tips-card {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    position: sticky;
+    top: 88px;
+}
+
+.tips-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tips-list li {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    padding-left: 12px;
+    border-left: 3px solid var(--accent);
+}
+
+.tips-list li strong {
+    display: block;
+    color: var(--text-primary);
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+/* Live Preview */
+.preview-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    min-height: 1.4em;
+}
+
+.preview-description {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 12px;
+    min-height: 3em;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+@media (max-width: 768px) {
+    .create-campaign-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .tips-card {
+        position: static;
+    }
+}

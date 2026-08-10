@@ -643,3 +643,160 @@ all error responses consistent in shape.
 Every error response from our API has the same shape — just different values.
 Frontend developers consuming the API only need to handle one error format
 instead of writing different handling logic for each error type.
+
+---
+
+## Frontend
+
+### Tech Stack
+- HTML5 — structure and content of each page
+- CSS3 — styling, layout, colors, fonts
+- JavaScript + jQuery — behavior and dynamic content
+- AJAX — calls Spring Boot REST API without page reloads
+
+### Where frontend files live
+Spring Boot automatically serves anything in src/main/resources/static/.
+No extra configuration needed.
+```
+static/
+├── css/styles.css
+├── index.html              → campaign list page
+├── campaign.html           → campaign detail + donation form
+├── create-campaign.html    → create campaign form
+└── js/
+    ├── campaigns.js        → JS for index.html
+    ├── campaign.js         → JS for campaign.html
+    └── create-campaign.js  → JS for create-campaign.html
+```
+
+### CSS Variables
+Defined once in :root, used everywhere. Change one value to retheme
+the entire app instantly.
+```css
+:root {
+    --primary: #0f2952;
+    --accent: #c9982a;
+}
+nav { background-color: var(--primary); } /* uses the variable */
+```
+
+### jQuery vs plain JavaScript
+jQuery is a library that makes JavaScript shorter and easier:
+```javascript
+// Plain JavaScript
+document.getElementById("btn").addEventListener("click", function() {});
+
+// jQuery equivalent
+$("#btn").click(function() {});
+```
+$ is jQuery's selector function. #btn selects by ID, .btn by class.
+
+### $(document).ready()
+Waits for the entire HTML page to load before running JavaScript.
+Without this, JS might try to find elements that don't exist yet.
+```javascript
+$(document).ready(function() {
+    loadCampaigns(); // safe to run now
+});
+```
+
+### AJAX with jQuery
+Calls the Spring Boot REST API in the background without reloading the page.
+```javascript
+$.ajax({
+    url: "/api/campaigns",
+    method: "GET",
+    success: function(data) {
+        // runs when API returns successfully
+    },
+    error: function(xhr) {
+        // runs when something goes wrong
+    }
+});
+```
+
+### contentType: "application/json"
+Required when sending POST/PUT requests with a JSON body.
+Tells Spring Boot how to parse the request body.
+Without it, Spring Boot won't know it's receiving JSON → 400 error.
+```javascript
+$.ajax({
+    method: "POST",
+    contentType: "application/json",   // ← required
+    data: JSON.stringify(requestObj),  // ← convert JS object to JSON string
+});
+```
+
+### Reading URL query string
+Used in campaign.html to know which campaign to load.
+URL: campaign.html?id=1
+```javascript
+const params = new URLSearchParams(window.location.search);
+const campaignId = params.get("id"); // returns "1"
+```
+
+### escapeHtml() — XSS prevention
+Always use when inserting user-provided text into the DOM.
+Without it, malicious input like <script>alert('hacked')</script>
+would execute in the browser — called XSS (Cross-Site Scripting).
+```javascript
+function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML; // safe string
+}
+```
+
+### Client-side vs server-side validation
+We validate forms in JavaScript before sending to the API.
+This gives instant feedback without a network round trip.
+BUT the server always validates too — never trust only client-side
+validation because anyone can bypass it by sending requests directly
+(e.g. via Postman).
+
+Rule: validate on both sides, always.
+
+### Live preview pattern
+In create-campaign.html, the preview card updates as the user types
+using jQuery's .on("input") event listener:
+```javascript
+$("#campaignTitle").on("input", function() {
+    $("#previewTitle").text($(this).val() || "Your campaign title");
+});
+```
+
+### setTimeout for redirect after success
+Shows success message for 1.5 seconds then redirects to new page:
+```javascript
+setTimeout(function() {
+    window.location.href = "campaign.html?id=" + campaign.id;
+}, 1500);
+```
+
+### Disabling submit button during API call
+Prevents double submissions while request is processing:
+```javascript
+$("#submitCampaign").prop("disabled", true).text("Launching...");
+// re-enable on error:
+$("#submitCampaign").prop("disabled", false).text("🚀 Launch Campaign");
+```
+
+### Dynamic DOM manipulation with jQuery
+Building HTML strings in JavaScript and injecting into the page:
+```javascript
+// Build HTML string
+function buildCampaignCard(campaign) {
+    return `<div class="card">${campaign.title}</div>`;
+}
+
+// Inject into page
+$("#campaignGrid").append(buildCampaignCard(campaign));
+
+// Empty a container before refilling
+$("#donorList").empty();
+```
+
+### refreshCampaignStats() pattern
+After a successful donation, instead of reloading the whole page,
+we call GET /api/campaigns/{id} again and update only the numbers
+that changed. Gives a smooth experience without a full page reload.
